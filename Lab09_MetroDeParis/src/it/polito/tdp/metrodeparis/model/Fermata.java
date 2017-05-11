@@ -63,6 +63,7 @@ public class Fermata {
 	
 	@Override
 	public String toString() {
-		return nome;
+		return nome + "\n";
 	}
+	
 }
