@@ -2,15 +2,17 @@ package it.polito.tdp.metrodeparis.model;
 
 public class CoppiaFermate {
 	
+	private int idConnessione;
 	private Fermata fermata1;
 	private Fermata fermata2;
-	private int id_linea;
+	private Linea linea;
 	
-	public CoppiaFermate(Fermata fermata1, Fermata fermata2, int id_linea) {
+	public CoppiaFermate(Fermata fermata1, Fermata fermata2, Linea linea, int idConnessione) {
 		super();
 		this.fermata1 = fermata1;
 		this.fermata2 = fermata2;
-		this.id_linea = id_linea;
+		this.linea = linea;
+		this.idConnessione = idConnessione;
 	}
 
 	public Fermata getFermata1() {
@@ -29,20 +31,27 @@ public class CoppiaFermate {
 		this.fermata2 = fermata2;
 	}
 
-	public int getId_linea() {
-		return id_linea;
+	public Linea getLinea() {
+		return linea;
 	}
 
-	public void setId_linea(int id_linea) {
-		this.id_linea = id_linea;
+	public void setLinea(Linea linea) {
+		this.linea = linea;
+	}
+
+	public int getIdConnessione() {
+		return idConnessione;
+	}
+
+	public void setIdConnessione(int idConnessione) {
+		this.idConnessione = idConnessione;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((fermata1 == null) ? 0 : fermata1.hashCode());
-		result = prime * result + ((fermata2 == null) ? 0 : fermata2.hashCode());
+		result = prime * result + idConnessione;
 		return result;
 	}
 
@@ -55,15 +64,7 @@ public class CoppiaFermate {
 		if (getClass() != obj.getClass())
 			return false;
 		CoppiaFermate other = (CoppiaFermate) obj;
-		if (fermata1 == null) {
-			if (other.fermata1 != null)
-				return false;
-		} else if (!fermata1.equals(other.fermata1))
-			return false;
-		if (fermata2 == null) {
-			if (other.fermata2 != null)
-				return false;
-		} else if (!fermata2.equals(other.fermata2))
+		if (idConnessione != other.idConnessione)
 			return false;
 		return true;
 	}

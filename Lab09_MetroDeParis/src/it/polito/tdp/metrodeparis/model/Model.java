@@ -3,12 +3,15 @@ package it.polito.tdp.metrodeparis.model;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.jgrapht.Graphs;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.DirectedWeightedMultigraph;
 
+import com.javadocmd.simplelatlng.LatLngTool;
+import com.javadocmd.simplelatlng.util.LengthUnit;
 
 import it.polito.tdp.metrodeparis.dao.MetroDAO;
 
@@ -37,68 +40,54 @@ public class Model {
 		List<Fermata> allFermate = metroDAO.getAllFermate();
 		return allFermate;
 	}
+	
+	public DirectedWeightedMultigraph<Fermata, DefaultWeightedEdge> getGrafo() {
+		if(this.graph==null) {
+			this.creaGrafo();
+		}
+		return this.graph ;
+	}
 
-	public void creaGrafo() {
-		
-		List<CoppiaFermate> archiDaVisitare= metroDAO.listaCoppieFermateCollegate();
-		List<CoppiaFermate> archiVisitati = new ArrayList<CoppiaFermate>();
-		DefaultWeightedEdge e1;
-		DefaultWeightedEdge e2;
-		DefaultWeightedEdge e3;
-		DefaultWeightedEdge e4;
+	public Set<Fermata> creaGrafo() {
 		
 		this.graph = new DirectedWeightedMultigraph<>(DefaultWeightedEdge.class);
 
 		Graphs.addAllVertices(graph, this.getFermate());
-
-		for (CoppiaFermate cf1 : archiDaVisitare) {
-			for(CoppiaFermate cf2 : archiDaVisitare) {
-				if(cf1.equals(cf2)) {
-					
-					/*
-					 *  cf1 : Px   ---> Dx  LINEA X
-					 *        | | 
-					 * in giù | | in sù
-					 *        | |     
-					 *  cf2 : Py   ---> Dy  LINEA Y
-					 */
-					
-					// aggiungo l'arco da Px (LINEA X) a Py (LINEA Y), con peso uguale all'intervallo della LINEA Y
-					e1 = graph.addEdge(cf1.getFermata1(), cf2.getFermata1());
-					graph.setEdgeWeight(e1, metroDAO.getPeso(cf2.getId_linea()));
-					
-					// aggiungo l'arco da Py (LINEA Y) a Px (LINEA X), con peso uguale all'intervallo della LINEA X
-					e2 = graph.addEdge(cf2.getFermata1(), cf1.getFermata1());
-					graph.setEdgeWeight(e2, metroDAO.getPeso(cf1.getId_linea()));
-					
-					// aggiungo l'arco Px (LINEA X) a Dx (LINEA X), con peso uguale al tempo di percorrenza LINEA X
-					e3 = graph.addEdge(cf1.getFermata1(), cf1.getFermata2());
-					graph.setEdgeWeight(e3, metroDAO.getTempo(cf1.getFermata1(),cf1.getFermata2(), cf1.getId_linea()));
-					
-					// aggiungo l'arco da Py (LINEA Y) a Dy (LINEA Y), con peso uguale al tempo di percorrenza LINEA Y
-					e4 = graph.addEdge(cf2.getFermata1(), cf2.getFermata2());
-					graph.setEdgeWeight(e4, metroDAO.getTempo(cf2.getFermata1(),cf2.getFermata2(), cf2.getId_linea()));	
-					archiVisitati.add(cf2);
-					archiDaVisitare.remove(cf2);	
+		
+		for(Fermata f1 : graph.vertexSet())
+			for(Fermata f2 : graph.vertexSet())
+				if(f1.getIdFermata()==f2.getIdFermata() && f1.getLinea()!= f2.getLinea()) {
+					DefaultWeightedEdge e = graph.addEdge(f1, f2);
+					graph.setEdgeWeight(e, f2.getLinea().getIntervallo());
 				}
-			}
-			archiVisitati.add(cf1);
-			archiDaVisitare.remove(cf1);
+		
+		for(CoppiaFermate cf : metroDAO.listaConnessioni()) {
+			DefaultWeightedEdge e = graph.addEdge(cf.getFermata1(), cf.getFermata2());
+			graph.setEdgeWeight(e, this.getTempo(cf.getFermata1(), cf.getFermata2(), cf.getLinea()));
 		}
+		return graph.vertexSet();
 	}
 	
-	public List<Fermata> getPercorsoMinimo(Fermata partenza, Fermata arrivo) {
+	public double getTempo(Fermata f1, Fermata f2, Linea linea) {
 		
-		DijkstraShortestPath<Fermata, DefaultWeightedEdge> camminoMinimo = new DijkstraShortestPath<Fermata, DefaultWeightedEdge>(graph, partenza, arrivo);
+		int velocita = linea.getVelocita(); 
+		double tempo ;
+		double spazio;
 		
-		for(DefaultWeightedEdge d : camminoMinimo.getPath().getEdgeList()) {
-			if(!camminoMin.contains(graph.getEdgeSource(d)))
-				camminoMin.add(graph.getEdgeSource(d));
-			if(!camminoMin.contains(graph.getEdgeTarget(d)))
-				camminoMin.add(graph.getEdgeTarget(d));
-		}
-
-		return camminoMin;
+		spazio = LatLngTool.distance(f1.getCoords(), f2.getCoords(), LengthUnit.KILOMETER);
+		
+		tempo = spazio/velocita;
+		
+		return tempo;
+	}
+	
+	public List<DefaultWeightedEdge> getPercorsoMinimo(Fermata partenza, Fermata arrivo) {
+		
+		DijkstraShortestPath<Fermata, DefaultWeightedEdge> camminoMinimo = new DijkstraShortestPath<Fermata, DefaultWeightedEdge>(this.getGrafo(), partenza, arrivo);
+		
+		List<DefaultWeightedEdge> percorsoMinimo = camminoMinimo.getPath().getEdgeList();
+	
+		return percorsoMinimo;
 			
 	}
 	
@@ -106,7 +95,7 @@ public class Model {
 		
 		Long tempoTotale;
 		
-		DijkstraShortestPath<Fermata, DefaultWeightedEdge> camminoMinimo = new DijkstraShortestPath<Fermata, DefaultWeightedEdge>(graph, partenza, arrivo);
+		DijkstraShortestPath<Fermata, DefaultWeightedEdge> camminoMinimo = new DijkstraShortestPath<Fermata, DefaultWeightedEdge>(this.getGrafo(), partenza, arrivo);
 		
 		tempoTotale = (long) ((camminoMinimo.getPathLength()/3600)*1000) + (camminoMin.size()*30*1000);
 		Time result = new Time(tempoTotale);

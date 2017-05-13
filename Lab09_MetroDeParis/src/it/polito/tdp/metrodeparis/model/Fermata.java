@@ -7,13 +7,22 @@ public class Fermata {
 	private int idFermata;
 	private String nome;
 	private LatLng coords;
-
+	private Linea linea;
+	
 	public Fermata(int idFermata, String nome, LatLng coords) {
 		this.idFermata = idFermata;
 		this.nome = nome;
 		this.coords = coords;
 	}
 	
+	public Fermata(int idFermata, String nome, LatLng coords, Linea linea) {
+		super();
+		this.idFermata = idFermata;
+		this.nome = nome;
+		this.coords = coords;
+		this.linea = linea;
+	}
+
 	public Fermata(int idFermata) {
 		this.idFermata = idFermata;
 	}
@@ -41,10 +50,23 @@ public class Fermata {
 	public void setCoords(LatLng coords) {
 		this.coords = coords;
 	}
+	
+	
+	public Linea getLinea() {
+		return linea;
+	}
+
+	public void setIdLinea(Linea linea) {
+		this.linea = linea;
+	}
 
 	@Override
 	public int hashCode() {
-		return ((Integer) idFermata).hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + idFermata;
+		result = prime * result + ((linea == null) ? 0 : linea.hashCode());
+		return result;
 	}
 
 	@Override
@@ -58,12 +80,17 @@ public class Fermata {
 		Fermata other = (Fermata) obj;
 		if (idFermata != other.idFermata)
 			return false;
+		if (linea == null) {
+			if (other.linea != null)
+				return false;
+		} else if (!linea.equals(other.linea))
+			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
-		return nome + "\n";
+		return nome;
 	}
 	
 }

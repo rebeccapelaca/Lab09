@@ -4,6 +4,9 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.DirectedWeightedMultigraph;
+
 import it.polito.tdp.metrodeparis.model.Fermata;
 import it.polito.tdp.metrodeparis.model.Model;
 import javafx.event.ActionEvent;
@@ -36,7 +39,22 @@ public class MetroDeParisController {
 
     @FXML
     void doCalcolaPercorso(ActionEvent event) {
-
+    	
+    	DirectedWeightedMultigraph<Fermata, DefaultWeightedEdge> graph = model.getGrafo();
+    	List<DefaultWeightedEdge> percorsoMinimo = model.getPercorsoMinimo(cmbBoxPartenza.getValue(), cmbBoxArrivo.getValue());
+    	String risultato = "";
+		for(DefaultWeightedEdge dwe : percorsoMinimo) {
+			if(graph.getEdgeSource(dwe).getIdFermata()==(graph.getEdgeTarget(dwe)).getIdFermata()) {
+				risultato += "Cambio su linea: " + graph.getEdgeTarget(dwe).getLinea() + "\n" + 
+			                graph.getEdgeSource(dwe).getNome() + ", linea " + graph.getEdgeSource(dwe).getLinea() + " -> " +
+			                graph.getEdgeTarget(dwe).getNome() + ",linea " + graph.getEdgeTarget(dwe).getLinea() + "\n\n";
+			}
+			
+			else
+				risultato += graph.getEdgeSource(dwe).getNome() + ", linea " + graph.getEdgeSource(dwe).getLinea() + "\n\n";
+		}
+		risultato += cmbBoxArrivo.getValue().getNome() + ", linea " + cmbBoxArrivo.getValue().getLinea();
+		txtResult.appendText(risultato);	
     }
 
     @FXML
