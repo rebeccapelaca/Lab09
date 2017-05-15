@@ -35,7 +35,7 @@ public class TestModel {
 			else
 				risultato += graph.getEdgeSource(dwe) + ", linea " + graph.getEdgeSource(dwe).getLinea() + "\n\n";
 		}
-		risultato += listaFermate.get(18) + ", linea " + listaFermate.get(19).getLinea();
+		risultato += listaFermate.get(19) + ", linea " + listaFermate.get(19).getLinea();
 		System.out.println(risultato);	
 	}
 }
