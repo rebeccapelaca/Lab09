@@ -50,7 +50,7 @@
                   </VBox>
                   <Button fx:id="btnCalcolaPercorso" mnemonicParsing="false" onAction="#doCalcolaPercorso" text="Calcola percorso">
                      <HBox.margin>
-                        <Insets left="35.0" top="15.0" />
+                        <Insets left="35.0" right="10.0" top="15.0" />
                      </HBox.margin>
                   </Button>
                </children>
