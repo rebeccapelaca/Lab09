@@ -69,12 +69,12 @@ public class MetroDeParisController {
 	public void setModel(Model model) {
 		this.model = model;
 		
-		List<Fermata> fermate = model.getAllFermate();
+		List<Fermata> fermate = model.getFermate();
 		cmbBoxPartenza.getItems().addAll(fermate);
 		cmbBoxArrivo.getItems().addAll(fermate);
 		if (cmbBoxPartenza.getItems().size() > 0)
-			cmbBoxPartenza.setValue(model.getAllFermate().get(0));
+			cmbBoxPartenza.setValue(model.getFermate().get(0));
 		if (cmbBoxArrivo.getItems().size() > 0)
-			cmbBoxArrivo.setValue(model.getAllFermate().get(0));
+			cmbBoxArrivo.setValue(model.getFermate().get(0));
 	}
 }
